@@ -1,2 +1,2 @@
-# aws-parallelcluster-handson
-for aws parallelcluster handson #jawshpc
+# aws-parallelcluster-workshop
+for aws parallelcluster workshop #jawshpc
