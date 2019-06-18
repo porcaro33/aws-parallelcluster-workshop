@@ -301,59 +301,72 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
-          mkdir -p /home/centos/tmp
           mkdir -p /home/centos/pcluster
-          cd /home/centos/tmp
           yum install -y git
+          cd /tmp
           git clone https://github.com/porcaro33/aws-parallelcluster-workshop.git
           cd aws-parallelcluster-workshop
+          chmod +x ./bastion_setup.sh
           ./bastion_setup.sh
 
   GitRepo:
     Type: AWS::CodeCommit::Repository
     Properties:
-      RepositoryDescription: parallelcluster-git
-      RepositoryName: parallelcluster-git
+      RepositoryDescription: pcluster-git
+      RepositoryName: pcluster-git
 
-  Pipeline:
-    Type: AWS::CodeDeploy::Application
+  PclusterAdmin:
+    Type: AWS::IAM::User
     Properties:
-      ApplicationName: parallelcluster-pipeline
-      ComputePlatform: Server
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      UserName: pcluster-admin
 
 Outputs:
     VPC:
-        Description: A VPC for AWS ParallelCluster
-        Value: !Ref VPC
+      Description: A VPC for AWS ParallelCluster
+      Value: !Ref VPC
 
     PublicSubnet:
-        Description: Public subnet for AWS ParallelCluster
-        Value: !Ref PublicSubnet
+      Description: Public subnet for AWS ParallelCluster
+      Value: !Ref PublicSubnet
 
     PrivateSubnet:
-        Description: Private subnet for AWS ParallelCluster
-        Value: !Ref PrivateSubnet
+      Description: Private subnet for AWS ParallelCluster
+      Value: !Ref PrivateSubnet
 
     BastionInstanceProfile:
-        Description: Instance role for ParallelCluster
-        Value: !GetAtt BastionInstanceProfile.Arn
+      Description: Instance role for ParallelCluster
+      Value: !GetAtt BastionInstanceProfile.Arn
 
     ClusterInstanceProfile:
-        Description: Instance role for ParallelCluster
-        Value: !GetAtt ClusterInstanceProfile.Arn
+      Description: Instance role for ParallelCluster
+      Value: !GetAtt ClusterInstanceProfile.Arn
 
     SecurityGroupA:
-        Description: Security group for bastion server
-        Value: !Ref SecurityGroupA
+      Description: Security group for bastion server
+      Value: !Ref SecurityGroupA
 
     SecurityGroupB:
-        Description: Security group for ParallelCluster
-        Value: !Ref SecurityGroupB
+      Description: Security group for ParallelCluster
+      Value: !Ref SecurityGroupB
 
     S3Bucket:
-        Description: S3 bucket for ParallelCluster
-        Value: !Ref S3Bucket
+      Description: S3 bucket for ParallelCluster
+      Value: !Ref S3Bucket
 
     BastionEC2:
-        Description: Bastion EC2
-        Value: !GetAtt BastionEC2.PublicIp
+      Description: Bastion EC2
+      Value: !GetAtt BastionEC2.PublicIp
+
+    GitRepoHTTP:
+      Description: CodeCommit
+      Value: !GetAtt GitRepo.CloneUrlHttp
+
+    GitRepoSSH:
+      Description: CodeCommit
+      Value: !GetAtt GitRepo.CloneUrlSsh
+
+    PclusterAdmin:
+      Description: IAM User - ParallelCluster Admin
+      Value: !GetAtt PclusterAdmin.Arn
