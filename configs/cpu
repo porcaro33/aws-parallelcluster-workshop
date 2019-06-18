@@ -1,0 +1,63 @@
+[aws]
+aws_region_name = us-west-2
+
+[vpc private]
+master_subnet_id = <your private subnet>
+compute_subnet_id = <your private subnet>
+vpc_id = <your vpc>
+ssh_from = 10.0.0.0/8
+additional_sg = <your security group>
+use_public_ips = false
+
+[global]
+update_check = true
+sanity_check = true
+cluster_template = default
+
+[aliases]
+ssh = ssh {CFN_USER}@{MASTER_IP} {ARGS}
+
+[cluster default]
+vpc_settings = private
+key_name = <your key>
+
+master_instance_type = m5.2xlarge
+compute_instance_type = c5.2xlarge
+initial_queue_size = 0
+max_queue_size = 10
+maintain_initial_size = false
+
+scheduler = sge
+cluster_type = spot
+spot_bid_percentage = 100
+
+ephemeral_dir = /scratch
+shared_dir = shared
+encrypted_ephemeral = false
+ebs_settings = shared
+
+master_root_volume_size = 30
+compute_root_volume_size = 30
+base_os = centos7
+
+scaling_settings = custom
+
+s3_read_resource = arn:aws:s3:::<your bucket>/*
+s3_read_write_resource = arn:aws:s3:::<your bucket>/*
+
+placement_group = DYNAMIC
+placement = compute
+
+tags = {"ClusterName" : "pcluster-cpu", "Application" : "Linpack", "OS Type" : "CentOS7", "Environment" : "Production", "User" : "Hiroshi"}
+
+post_install = s3://<your bucket name>/projects/cpu/scripts/00-cluster-init.sh
+
+extra_json = { "cfncluster" : { "cfn_scheduler_slots" : "cores" } }
+
+[ebs shared]
+volume_type = gp2
+volume_size = 2000
+encrypted = false
+
+[scaling custom]
+scaledown_idletime = 15
