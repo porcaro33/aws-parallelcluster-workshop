@@ -196,6 +196,10 @@ Resources:
         FromPort: '22'
         ToPort: '22'
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
           Value: BastionInstanceSG
@@ -308,7 +312,7 @@ Resources:
   BastionEC2:
     Type: AWS::EC2::Instance
     DependsOn:
-      - SecurityGroupA
+      - SecurityGroupBastion
       - BastionInstanceProfile
     Properties:
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", centos7imgid]
@@ -316,7 +320,7 @@ Resources:
       IamInstanceProfile: !Ref BastionInstanceProfile
       KeyName: !Ref KeyPairName
       SecurityGroupIds:
-        - Ref: "SecurityGroupA"
+        - Ref: "SecurityGroupBastion"
       SubnetId: !Ref PublicSubnet
       BlockDeviceMappings:
         - DeviceName: "/dev/sda1"
@@ -371,13 +375,13 @@ Outputs:
       Description: Instance role for ParallelCluster
       Value: !GetAtt ClusterInstanceProfile.Arn
 
-    SecurityGroupA:
+    SecurityGroupBastion:
       Description: Security group for bastion server
-      Value: !Ref SecurityGroupA
+      Value: !Ref SecurityGroupBastion
 
-    SecurityGroupB:
+    SecurityGroupCluster:
       Description: Security group for ParallelCluster
-      Value: !Ref SecurityGroupB
+      Value: !Ref SecurityGroupCluster
 
     S3Bucket:
       Description: S3 bucket for ParallelCluster
