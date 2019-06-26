@@ -185,7 +185,7 @@ Resources:
       SubnetId: !Ref PrivateSubnet
       RouteTableId: !Ref PrivateRouteTable
 
-  SecurityGroupA:
+  SecurityGroupBastion:
     Type: AWS::EC2::SecurityGroup
     DependsOn: PrivateRoute
     Properties:
@@ -202,9 +202,9 @@ Resources:
         - Key: Application
           Value: !Ref AWS::StackName
 
-  SecurityGroupB:
+  SecurityGroupCluster:
     Type: AWS::EC2::SecurityGroup
-    DependsOn: SecurityGroupA
+    DependsOn: SecurityGroupBastion
     Properties:
       GroupDescription: SecurityGroup for ParallelCluster
       VpcId: !Ref VPC
@@ -212,27 +212,55 @@ Resources:
       - IpProtocol: tcp
         FromPort: '0'
         ToPort: '65535'
-        SourceSecurityGroupId: !Ref SecurityGroupA
+        SourceSecurityGroupId: !Ref SecurityGroupBastion
       Tags:
         - Key: Name
           Value: ParallelClusterSG
         - Key: Application
           Value: !Ref AWS::StackName
 
-  SecurityGroupBIngress:
+  SecurityGroupBastionIngress:
     Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: SecurityGroupB
+    DependsOn: SecurityGroupCluster
     Properties:
-      GroupId: !Ref SecurityGroupB
+      GroupId: !Ref SecurityGroupCluster
       IpProtocol: tcp
       FromPort: '0'
       ToPort: '65535'
-      SourceSecurityGroupId: !Ref SecurityGroupB
+      SourceSecurityGroupId: !Ref SecurityGroupCluster
 
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref BucketName
+
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeStarServiceRole
+      Path: /service-role/
+
+  CodeDeployServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+      Path: /service-role/
 
   ClusterRole:
     Type: AWS::IAM::Role
@@ -267,6 +295,7 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
       Path: /
 
   BastionInstanceProfile:
@@ -301,7 +330,6 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
-          mkdir -p /home/centos/pcluster
           yum install -y git
           cd /tmp
           git clone https://github.com/porcaro33/aws-parallelcluster-workshop.git
@@ -358,10 +386,6 @@ Outputs:
     BastionEC2:
       Description: Bastion EC2
       Value: !GetAtt BastionEC2.PublicIp
-
-    GitRepoHTTP:
-      Description: CodeCommit
-      Value: !GetAtt GitRepo.CloneUrlHttp
 
     GitRepoSSH:
       Description: CodeCommit
