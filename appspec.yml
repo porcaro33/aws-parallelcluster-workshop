@@ -1,0 +1,3 @@
+files:
+   - source: configs/
+     destination: /home/centos/.parallelcluster/
