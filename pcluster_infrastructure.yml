@@ -217,6 +217,14 @@ Resources:
         FromPort: '0'
         ToPort: '65535'
         SourceSecurityGroupId: !Ref SecurityGroupBastion
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp:
+          Fn::FindInMap:
+            - SubnetConfig
+            - Public
+            - CIDR
       Tags:
         - Key: Name
           Value: ParallelClusterSG
@@ -277,7 +285,7 @@ Resources:
               Service: ec2.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AdministratorAccess
       Path: /
 
   ClusterInstanceProfile:
