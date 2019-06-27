@@ -24,5 +24,5 @@ ${CLSTINI_DIR}/run/01-install-basic-tools.sh
 ${CLSTINI_DIR}/run/01-reassign-nametag.sh
 ${CLSTINI_DIR}/run/02-creategroup-admin.sh
 ${CLSTINI_DIR}/run/02-createuser-pcluster.sh
-#${CLSTINI_DIR}/run/03-install-hpc.sh
+${CLSTINI_DIR}/run/03-install-ompi4.sh
 ${CLSTINI_DIR}/run/08-install-cloudwatch-agent.sh
