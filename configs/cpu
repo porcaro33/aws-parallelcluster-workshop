@@ -32,13 +32,14 @@ cluster_type = spot
 spot_bid_percentage = 100
 
 ephemeral_dir = /scratch
-shared_dir = shared
 encrypted_ephemeral = false
-ebs_settings = shared
+fsx_settings = lustre
+shared_dir = clustertmp
 
 master_root_volume_size = 30
 compute_root_volume_size = 30
 base_os = centos7
+ec2_iam_role = <cluster_IAM_role>
 
 scaling_settings = custom
 
@@ -48,16 +49,15 @@ s3_read_write_resource = arn:aws:s3:::<your bucket>/*
 placement_group = DYNAMIC
 placement = compute
 
-tags = {"ClusterName" : "pcluster-cpu", "Application" : "Linpack", "OS Type" : "CentOS7", "Environment" : "Production", "User" : "Hiroshi"}
+tags = {"ClusterName" : "parallelcluster-cpu", "Application" : "Linpack", "OS Type" : "CentOS7", "Environment" : "Production", "User" : "JAWSHPC"}
 
 post_install = s3://<your bucket name>/projects/cpu/scripts/00-cluster-init.sh
 
 extra_json = { "cfncluster" : { "cfn_scheduler_slots" : "cores" } }
 
-[ebs shared]
-volume_type = gp2
-volume_size = 2000
-encrypted = false
+[fsx lustre]
+shared_dir = /shared
+storage_capacity = 3600
 
 [scaling custom]
 scaledown_idletime = 15
