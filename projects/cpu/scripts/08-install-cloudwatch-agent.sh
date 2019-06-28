@@ -5,6 +5,8 @@ set -ex
 # import parameters
 . /etc/parallelcluster/cfnconfig
 CLSTINI_DIR="/shared/cluster-init"
+S3BUCKET="<your bucket name>"
+CLSTNM="cpu"
 
 # Runs only on scheduler
 if [[ ${cfn_node_type} =~ "MasterServer" ]]; then
@@ -25,7 +27,7 @@ if [[ ${cfn_node_type} =~ "MasterServer" ]]; then
   popd ${CLSTINI_DIR}/cloudwatch_install
 
   # deploy cloudwatch config
-  aws s3 cp s3://parallelcluster.wdc.com/projects/kobayashi/files/config.json /opt/aws/amazon-cloudwatch-agent/bin/config.json
+  aws s3 cp s3://${S3BUCKET}/projects/${CLSTNM}/files/config.json /opt/aws/amazon-cloudwatch-agent/bin/config.json
   /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s
 
   # enable cloudwatch agent
