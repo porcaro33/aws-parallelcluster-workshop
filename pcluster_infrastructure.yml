@@ -379,9 +379,9 @@ Outputs:
       Description: Instance role for ParallelCluster
       Value: !GetAtt BastionInstanceProfile.Arn
 
-    ClusterInstanceProfile:
+    ClusterRole:
       Description: Instance role for ParallelCluster
-      Value: !GetAtt ClusterInstanceProfile.Arn
+      Value: !GetAtt ClusterRole.Arn
 
     SecurityGroupBastion:
       Description: Security group for bastion server
